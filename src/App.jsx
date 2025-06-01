@@ -10,10 +10,11 @@ function App() {
   // Estados:
   const [products, setProducts] = useState([]);
   const [busqueda, setBusqueda] = useState("");
+  const [mostrar, setMostrar] = useState(true);
 
   // Extraer datos de la API:
   useEffect(() => {
-    axios.get("https://dummyjson.com/products?limit=5").then((res) =>{
+    axios.get("https://dummyjson.com/products?limit=100").then((res) =>{
       setProducts(res.data.products)
     })
   }, []);
@@ -26,7 +27,7 @@ function App() {
   const productosTotales = productosFiltrados.length;
   
   // B- Precio total de la sumatoria de productos:
-  const precioTotal = productosFiltrados.reduce((acum, producto) => acum + producto.price, 0);
+  const precioTotal = productosFiltrados.reduce((acum, producto) => acum + producto.price, 0).toFixed(2);
   
   // C- Precio maximo:
   const precioMax= productosFiltrados.length > 0 ? Math.max(...productosFiltrados.map((producto) => producto.price)) : 0;
@@ -54,9 +55,37 @@ function App() {
   return (
     <>
 
+      
       <Content />
 
-      <div className="text-gray-400 bg-gray-900 body-font overflow-hidden">
+
+      <div className="text-gray-400 bg-gray-900 body-font overflow-hidden pl-35 pb-8">
+
+        {/* Boton para mostrar las estadistícas */}
+        <button onClick={()=> setMostrar(!mostrar)} className="bg-sky-500 hover:bg-sky-400 text-white py-2 px-4 rounded">
+           {mostrar ? 'Ocultar Estadísticas' : 'Mostrar Estadísticas'}
+        </button>
+
+        { mostrar && 
+          (
+            <StatsPanel 
+            cantProductos = {productosTotales}
+            precioTotalProductos = {precioTotal}
+            precioMax = {precioMax}
+            tituloMaxPrecio = {tituloMax}
+            precioMin = {precioMin}
+            tituloMinPrecio ={tituloMin}
+            promPrecios = {promedioPrecios}
+            promDescuentos = {promedioDescuentos}
+            stock = {stockTotal}
+            cantProductosTitulo20 = {productosTitulo20}
+            />
+          )
+        }
+
+      </div>
+
+      <div className="text-gray-400 bg-gray-900 body-font overflow-hidden ">
         <input
           type="text"
           placeholder="Buscar Producto"
@@ -84,18 +113,8 @@ function App() {
           {productosFiltrados.length === 0 && <p className="text-gray-400 bg-gray-900 body-font overflow-hidden">  No se encontraron productos</p>}
 
       </div>
-      <StatsPanel 
-      cantProductos = {productosTotales}
-      precioTotalProductos = {precioTotal}
-      precioMax = {precioMax}
-      tituloMaxPrecio = {tituloMax}
-      precioMin = {precioMin}
-      tituloMinPrecio ={tituloMin}
-      promPrecios = {promedioPrecios}
-      promDescuentos = {promedioDescuentos}
-      stock = {stockTotal}
-      cantProductosTitulo20 = {productosTitulo20}
-      />
+      
+      
     </>
   )
 }

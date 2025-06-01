@@ -1,12 +1,8 @@
 function StatsPanel(props) {
   return (
-    <section className="text-gray-400 bg-gray-900 body-font">
+    <section className="text-gray-400 bg-gray-900 body-font pt-8">
       <div className="container px-5 py-1 mx-auto">
-        <div className="flex flex-col text-center w-full mb-20">
-          <h1 className="text-3xl text-blue-600 font-bold">
-            Estádisticas
-          </h1>
-        </div>
+        
 
         <div className="flex flex-wrap -m-4 text-center">
 
