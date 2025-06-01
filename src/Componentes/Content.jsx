@@ -2,7 +2,7 @@
 
 function Content() {
   return (
-    <section className="text-gray-400 bg-gray-900 body-font">
+    
       <div className="container px-5 py-10 mx-auto flex flex-col">
         <div className="lg:w-4/6 mx-auto">
           <div className="rounded-lg h-64 overflow-hidden">
@@ -22,14 +22,14 @@ function Content() {
                     />
               </div>
               <div className="flex flex-col items-center text-center justify-center">
-                <h2 className="font-medium title-font mt-4 text-white text-lg">
+                <h2 >
                   Palomeque Jonathan Manuel
                 </h2>
                 <div className="w-12 h-1 bg-sky-500 rounded mt-2 mb-4"></div>
                 <a href="https://github.com/manuelpalomeque" target="_blank" >
                     Github
                     </a>
-                <p className="text-base text-gray-400">
+                <p>
                     Año: 2025    
                 </p>
               </div>
@@ -45,7 +45,7 @@ function Content() {
           </div>
         </div>
       </div>
-    </section>
+    
   );
 }
 

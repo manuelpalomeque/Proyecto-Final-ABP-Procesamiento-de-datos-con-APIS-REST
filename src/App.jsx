@@ -1,9 +1,11 @@
 import './App.css';
+//Importar componentes propios
 import Content from "./Componentes/Content";
 import ProductList from "./Componentes/ProductList";
 import StatsPanel from "./Componentes/StatsPanel";
+import SearchBar from "./Componentes/SearchBar";
 import axios from "axios";
-import {useEffect, useState } from "react";
+import {useEffect, useState, useRef } from "react";
 
 function App() {
   
@@ -11,6 +13,10 @@ function App() {
   const [products, setProducts] = useState([]);
   const [busqueda, setBusqueda] = useState("");
   const [mostrar, setMostrar] = useState(true);
+  const [modoOscuro, setModoOscuro] = useState(false);
+
+  //Referencias:
+  const contenedorRef = useRef(null);
 
   // Extraer datos de la API:
   useEffect(() => {
@@ -52,15 +58,23 @@ function App() {
   // H- Stock total disponible:
   const stockTotal = productosFiltrados.reduce((acum, producto) => acum + producto.stock, 0);
 
-  return (
-    <>
+  // Funcion auxiliar para el modo oscuro:
+  const toggleModoOscuro = ()=>{
+      setModoOscuro(!modoOscuro);
+      contenedorRef.current.classList.toggle("dark-mode");
+  };
 
-      
+  return (
+    <div ref={contenedorRef}>
+
       <Content />
 
+      <div className="mb-4 ml-35">
+        {/* Modo oscuro */}
+        <button onClick={toggleModoOscuro} className="bg-sky-500 hover:bg-sky-400 text-white py-2 px-4 rounded ">Modo {modoOscuro ? "Claro" : "Oscuro"}</button>
+      </div>
 
-      <div className="text-gray-400 bg-gray-900 body-font overflow-hidden pl-35 pb-8">
-
+      <div className="mb-4 ml-35">
         {/* Boton para mostrar las estadistícas */}
         <button onClick={()=> setMostrar(!mostrar)} className="bg-sky-500 hover:bg-sky-400 text-white py-2 px-4 rounded">
            {mostrar ? 'Ocultar Estadísticas' : 'Mostrar Estadísticas'}
@@ -84,17 +98,18 @@ function App() {
         }
 
       </div>
-
-      <div className="text-gray-400 bg-gray-900 body-font overflow-hidden ">
-        <input
-          type="text"
-          placeholder="Buscar Producto"
-          value={busqueda}
-          onChange={(e)=>{setBusqueda(e.target.value)}}
-          className="text-white ml-35 bg-gray-800 px-5 py-2 rounded"
-        />
+  
+      <div  className="mb-4 ml-35">
+      {/* Barra de búsqueda*/}
+        <SearchBar 
+          valorabuscar = {busqueda}
+          setBusqueda={setBusqueda} 
+          
+        /> 
       </div>
 
+     
+      {/* Productos */}
       <div>
         {productosFiltrados.map((p)=>(
           <ProductList 
@@ -110,12 +125,12 @@ function App() {
           ))}
 
           {/* Renderizacion condicional: */}
-          {productosFiltrados.length === 0 && <p className="text-gray-400 bg-gray-900 body-font overflow-hidden">  No se encontraron productos</p>}
+          {productosFiltrados.length === 0 && <p>  No se encontraron productos</p>}
 
       </div>
       
       
-    </>
+    </div>
   )
 }
 
