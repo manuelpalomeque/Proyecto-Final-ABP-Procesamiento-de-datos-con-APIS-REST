@@ -4,31 +4,63 @@ import Content from "./Componentes/Content";
 import ProductList from "./Componentes/ProductList";
 import StatsPanel from "./Componentes/StatsPanel";
 import SearchBar from "./Componentes/SearchBar";
+import SeleccionCategoria from "./Componentes/SeleccionCategoria";
+import Ordenamiento from "./Componentes/Ordenamiento";
 import axios from "axios";
 import {useEffect, useState, useRef } from "react";
 
+
 function App() {
   
-  // Estados:
+  // Estados: ----------------------------------------------------------------------------------------------------------
   const [products, setProducts] = useState([]);
   const [busqueda, setBusqueda] = useState("");
   const [mostrar, setMostrar] = useState(true);
   const [modoOscuro, setModoOscuro] = useState(false);
+  const [categorias, setCategorias] = useState([]);
+  const [mostrarCategorias, setMostrarCategorias] = useState(false); // Estado para mostrar/ocultar el menú de categorías
+  const [categoriaSeleccionada, setCategoriaSeleccionada] = useState(""); // Categoría actualmente seleccionada
+  const [ordenarPor, setOrdenarPor] = useState(""); // "precio" o "rating"
+  const [ordenAscendente, setOrdenAscendente] = useState(true); // true: ascendente, false: descendente
+
 
   //Referencias:
   const contenedorRef = useRef(null);
 
-  // Extraer datos de la API:
+  // Extraer lista de categorias de productos de la API ------------------------------------------------------------------
   useEffect(() => {
-    axios.get("https://dummyjson.com/products?limit=100").then((res) =>{
-      setProducts(res.data.products)
+    axios.get("https://dummyjson.com/products/category-list").then((res) =>{
+      setCategorias(res.data)
     })
   }, []);
 
-  // Filtrar los productos:
-  const productosFiltrados = products.filter((p)=> p.title.toLowerCase().includes(busqueda.toLowerCase()));
+  
+  // Extraer productos de la API: ------------------------------------------------------------------------------------------
+  useEffect(() => {
+    axios.get("https://dummyjson.com/products?limit=100").then((res) => {
+      setProducts(res.data.products);
+    });
+  }, []);
 
-  // Estadisticas:
+  // Filtrar por búsqueda y categoría 
+  let productosFiltrados = products
+    .filter((p) => p.title.toLowerCase().includes(busqueda.toLowerCase()))
+    .filter((p) => !categoriaSeleccionada || p.category === categoriaSeleccionada);
+
+    // Ordenar productos filtrados
+  if (ordenarPor) {
+    productosFiltrados = [...productosFiltrados].sort((a, b) => {
+      if (ordenarPor === "precio") {
+        return ordenAscendente ? a.price - b.price : b.price - a.price;
+      }
+      if (ordenarPor === "rating") {
+        return ordenAscendente ? a.rating - b.rating : b.rating - a.rating;
+      }
+      return 0;
+    });
+  }
+
+  // Estadisticas:    --------------------------------------------------------------------------------------------------------
   // A - Productos totales:
   const productosTotales = productosFiltrados.length;
   
@@ -49,7 +81,7 @@ function App() {
   const productosTitulo20 = productosFiltrados.filter((producto) => producto.title.length > 20).length;
 
   // F- Promedio de Descuentos:
-  const descuentoTotal = productosFiltrados.reduce((acum, producto) => acum + producto.discountPercentage, 0);
+  const descuentoTotal = productosFiltrados.reduce((acum, producto) => acum + producto.discountPercentage, 0).toFixed(2);
   const promedioDescuentos = productosFiltrados.length > 0 ? descuentoTotal/productosTotales: 0;
   
   // G- Promedio de Precios:
@@ -58,7 +90,7 @@ function App() {
   // H- Stock total disponible:
   const stockTotal = productosFiltrados.reduce((acum, producto) => acum + producto.stock, 0);
 
-  // Funcion auxiliar para el modo oscuro:
+  // Funcion auxiliar para el modo oscuro:--------------------------------------------------------------------------------------
   const toggleModoOscuro = ()=>{
       setModoOscuro(!modoOscuro);
       contenedorRef.current.classList.toggle("dark-mode");
@@ -89,8 +121,8 @@ function App() {
             tituloMaxPrecio = {tituloMax}
             precioMin = {precioMin}
             tituloMinPrecio ={tituloMin}
-            promPrecios = {promedioPrecios}
-            promDescuentos = {promedioDescuentos}
+            promPrecios = {promedioPrecios.toFixed(2)}
+            promDescuentos = {promedioDescuentos.toFixed(2)}
             stock = {stockTotal}
             cantProductosTitulo20 = {productosTitulo20}
             />
@@ -98,17 +130,34 @@ function App() {
         }
 
       </div>
+
+      {/* Barra de búsqueda*/}
   
       <div  className="mb-4 ml-35">
-      {/* Barra de búsqueda*/}
         <SearchBar 
           valorabuscar = {busqueda}
           setBusqueda={setBusqueda} 
-          
+    
         /> 
       </div>
 
-     
+      {/* Botón para selecionar categorías */}
+      <SeleccionCategoria
+        categorias={categorias}
+        categoriaSeleccionada={categoriaSeleccionada}
+        setCategoriaSeleccionada={setCategoriaSeleccionada}
+        mostrarCategorias={mostrarCategorias}
+        setMostrarCategorias={setMostrarCategorias}
+      />
+
+      {/*  Ordenar por precio y rating */}
+      <Ordenamiento
+        ordenarPor={ordenarPor}
+        setOrdenarPor={setOrdenarPor}
+        ordenAscendente={ordenAscendente}
+        setOrdenAscendente={setOrdenAscendente}
+      />
+          
       {/* Productos */}
       <div>
         {productosFiltrados.map((p)=>(
@@ -121,6 +170,7 @@ function App() {
           stock ={p.stock} 
           alto={p.dimensions.height}
           ancho={p.dimensions.width}
+          rating={p.rating}
           />
           ))}
 

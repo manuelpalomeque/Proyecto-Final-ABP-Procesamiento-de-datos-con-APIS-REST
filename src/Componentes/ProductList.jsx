@@ -20,6 +20,10 @@ function ProductList(props) {
           <span className="text-gray-500">Alto</span>
           <span className="ml-auto 0">{props.alto}</span>
         </div>
+        <div className="flex border-t border-gray-800 py-2">
+          <span className="text-gray-500">Rating</span>
+          <span className="ml-auto 0">{props.rating}</span>
+        </div>
         <div className="flex border-t border-b mb-6 border-gray-800 py-2">
           <span className="text-gray-500">Cantidad</span>
           <span className="ml-auto 0">{props.stock}</span>
