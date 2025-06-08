@@ -144,6 +144,25 @@ function StatsPanel(props) {
             </div>
           </div>
 
+          <div className="p-4 md:w-1/4 sm:w-1/2 w-full">
+            <div className="border-2 border-gray-800 px-4 py-6 rounded-lg">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="w-12 h-12 mb-3 inline-block text-blue-400"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2}
+              >
+                <rect x="4" y="10" width="3" height="7" rx="1" />
+                <rect x="10.5" y="6" width="3" height="11" rx="1" />
+                <rect x="17" y="13" width="3" height="4" rx="1" />
+              </svg>
+              <h2 className="title-font font-medium text-3xl ">{props.productosStockYRating}</h2>
+              <p className="leading-relaxed">Cantidad de productos con stock mayor a 50 y rating mayor a 4.5</p>
+            </div>
+          </div>
+
         </div>
       </div>
     </section>

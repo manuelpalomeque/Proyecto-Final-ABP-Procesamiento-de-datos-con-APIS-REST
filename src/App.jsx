@@ -5,8 +5,10 @@ import ProductList from "./Componentes/ProductList";
 import StatsPanel from "./Componentes/StatsPanel";
 import SearchBar from "./Componentes/SearchBar";
 import SeleccionCategoria from "./Componentes/SeleccionCategoria";
+import EstadisticasPorCategoria from "./Componentes/EstadisticasPorCategoria";
 import Ordenamiento from "./Componentes/Ordenamiento";
 import axios from "axios";
+import { LineChart, Line } from 'recharts';
 import {useEffect, useState, useRef } from "react";
 
 
@@ -90,6 +92,45 @@ function App() {
   // H- Stock total disponible:
   const stockTotal = productosFiltrados.reduce((acum, producto) => acum + producto.stock, 0);
 
+  // I- Cantidad de productos con stock > 50 , rating > 4.5:
+  const productosStockYRating = productosFiltrados.filter((producto) => producto.stock > 50 && producto.rating > 4.5).length;
+  
+  // Estadisticas por categoria: cantidad, precio promedio, precio mínimo, precio máximo y promedio de rating --------------------------------
+  const estadisticasPorCategoria = productosFiltrados.reduce((acumulador, producto) => {
+    // Si la categoría no existe, la inicializa
+    if (!acumulador[producto.category]) {
+      acumulador[producto.category] = {
+        cantidad: 0,
+        sumaPrecios: 0,
+        precioMin: producto.price,
+        precioMax: producto.price,
+        sumaRating: 0
+      };
+    }
+    // Suma cantidad y precios
+    acumulador[producto.category].cantidad += 1;
+    acumulador[producto.category].sumaPrecios += producto.price;
+
+    // Calcula precio mínimo y máximo
+    if (producto.price < acumulador[producto.category].precioMin) {
+      acumulador[producto.category].precioMin = producto.price;
+    }
+    if (producto.price > acumulador[producto.category].precioMax) {
+      acumulador[producto.category].precioMax = producto.price;
+    }
+
+    // Suma ratings
+    acumulador[producto.category].sumaRating += producto.rating;
+
+    // Calcula promedios en cada iteración
+    const cat = acumulador[producto.category];
+    cat.precioPromedio = (cat.sumaPrecios / cat.cantidad).toFixed(2);
+    cat.ratingPromedio = (cat.sumaRating / cat.cantidad).toFixed(2);
+
+    return acumulador;
+  }, {});
+
+
   // Funcion auxiliar para el modo oscuro:--------------------------------------------------------------------------------------
   const toggleModoOscuro = ()=>{
       setModoOscuro(!modoOscuro);
@@ -114,6 +155,7 @@ function App() {
 
         { mostrar && 
           (
+            <div>
             <StatsPanel 
             cantProductos = {productosTotales}
             precioTotalProductos = {precioTotal}
@@ -125,7 +167,17 @@ function App() {
             promDescuentos = {promedioDescuentos.toFixed(2)}
             stock = {stockTotal}
             cantProductosTitulo20 = {productosTitulo20}
+            productosStockYRating = {productosStockYRating}
             />
+
+            {/* Estadisticas por categoria */}
+            <EstadisticasPorCategoria
+            estadisticasPorCategoria ={estadisticasPorCategoria}
+            />
+
+            {/* Visualizaciones */}
+
+            </div>
           )
         }
 
@@ -149,6 +201,8 @@ function App() {
         mostrarCategorias={mostrarCategorias}
         setMostrarCategorias={setMostrarCategorias}
       />
+
+
 
       {/*  Ordenar por precio y rating */}
       <Ordenamiento
