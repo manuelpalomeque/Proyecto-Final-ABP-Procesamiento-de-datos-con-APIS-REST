@@ -7,8 +7,10 @@ import SearchBar from "./Componentes/SearchBar";
 import SeleccionCategoria from "./Componentes/SeleccionCategoria";
 import EstadisticasPorCategoria from "./Componentes/EstadisticasPorCategoria";
 import Ordenamiento from "./Componentes/Ordenamiento";
+import GraficoBarras from './Componentes/GraficoBarras';  
+import GraficoPie from './Componentes/GraficoPie'; 
+import GraficoLinea from './Componentes/GraficoLinea';  
 import axios from "axios";
-import { LineChart, Line } from 'recharts';
 import {useEffect, useState, useRef } from "react";
 
 
@@ -130,6 +132,17 @@ function App() {
     return acumulador;
   }, {});
 
+  // Para visualizaciones: ----------------------------------------------------------------------------------------------------
+
+  // para grafico de barras
+    const cantidadPorCategoria = Object.keys(estadisticasPorCategoria).reduce((acum, categoria) => {
+    acum[categoria] = estadisticasPorCategoria[categoria].cantidad;
+    return acum;
+  }, {});
+
+  //Stock por producto:
+  const stockPorProducto = productosFiltrados.map(p => ({producto: p.title, stock: p.stock }));
+
 
   // Funcion auxiliar para el modo oscuro:--------------------------------------------------------------------------------------
   const toggleModoOscuro = ()=>{
@@ -175,9 +188,28 @@ function App() {
             estadisticasPorCategoria ={estadisticasPorCategoria}
             />
 
+            <div>
+              <br/>
+                <h1 className="text-3xl text-blue-600 font-bold">Visualizaciones:</h1>
+              <br/>
+            </div>
             {/* Visualizaciones */}
+            <GraficoBarras 
+            cantidadPorCategoria={
+              Object.entries(cantidadPorCategoria).map(([categoria, cantidad]) => ({
+                categoria,
+                cantidad
+              }))
+            } />
+             
+            <GraficoPie
+            stockPorProducto ={stockPorProducto}
+            />
+
+            <GraficoLinea/>
 
             </div>
+            
           )
         }
 
