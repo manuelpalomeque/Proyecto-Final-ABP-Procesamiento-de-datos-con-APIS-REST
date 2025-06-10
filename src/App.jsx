@@ -7,9 +7,11 @@ import SearchBar from "./Componentes/SearchBar";
 import SeleccionCategoria from "./Componentes/SeleccionCategoria";
 import EstadisticasPorCategoria from "./Componentes/EstadisticasPorCategoria";
 import Ordenamiento from "./Componentes/Ordenamiento";
+import ExportarProductos from "./Componentes/ExportarProductos";
 import GraficoBarras from './Componentes/GraficoBarras';  
 import GraficoPie from './Componentes/GraficoPie'; 
 import GraficoLinea from './Componentes/GraficoLinea';  
+import Paginacion from "./Componentes/Paginacion";
 import axios from "axios";
 import {useEffect, useState, useRef } from "react";
 
@@ -26,7 +28,8 @@ function App() {
   const [categoriaSeleccionada, setCategoriaSeleccionada] = useState(""); // Categoría actualmente seleccionada
   const [ordenarPor, setOrdenarPor] = useState(""); // "precio" o "rating"
   const [ordenAscendente, setOrdenAscendente] = useState(true); // true: ascendente, false: descendente
-
+  const [format, setFormat] = useState('') // para capturar el formato en el que se quiere exportar productos filtrados
+  const [page, setPage] =useState(1) // Permite lleva run registro de la pagina en la que estoy
 
   //Referencias:
   const contenedorRef = useRef(null);
@@ -51,7 +54,7 @@ function App() {
     .filter((p) => p.title.toLowerCase().includes(busqueda.toLowerCase()))
     .filter((p) => !categoriaSeleccionada || p.category === categoriaSeleccionada);
 
-    // Ordenar productos filtrados
+  // Ordenar productos filtrados
   if (ordenarPor) {
     productosFiltrados = [...productosFiltrados].sort((a, b) => {
       if (ordenarPor === "precio") {
@@ -63,6 +66,13 @@ function App() {
       return 0;
     });
   }
+
+  // Paginación local para traer 100 productos, pero mostrar solo  10 productos por pagina
+  const limite = 10
+
+  const inicio = (page - 1) * limite;
+  const fin = inicio + limite;
+  const productosPaginados = productosFiltrados.slice(inicio, fin);
 
   // Estadisticas:    --------------------------------------------------------------------------------------------------------
   // A - Productos totales:
@@ -148,6 +158,55 @@ function App() {
   const toggleModoOscuro = ()=>{
       setModoOscuro(!modoOscuro);
       contenedorRef.current.classList.toggle("dark-mode");
+  };
+
+
+  // Exportacion de datos: -------------------------------------------------------------------------------------------------------
+  const manejarExportacion = () => {
+    
+    if (format === "json") {
+      // Crear un blob JSON
+      const blob = new Blob([JSON.stringify(productosFiltrados, null, 2)], { type: "application/json" });
+      // Generar una URL temporal 
+      const url = URL.createObjectURL(blob);
+      // Llamar a la función para descargar el archivo
+      triggerDownload(url, "productos.json");
+    
+    } else if (format === "csv") {
+      // Si no hay productos no hace nada
+      if (productosFiltrados.length === 0) return;
+      // Configurar encabezados
+      const encabezados = Object.keys(productosFiltrados[0]).join(",");
+      // Generar las filas
+      const filas = productosFiltrados.map(p =>
+        Object.values(p).map(v => `"${String(v).replace(/"/g, '""')}"`).join(",")
+      );
+      // Unir encabezados y filas con saltos de línea
+      const csv = [encabezados, ...filas].join("\r\n");
+
+      // Crear un blob  CSV
+      const blob = new Blob([csv], { type: "text/csv" });
+      // Genera una URL temporal para el blob
+      const url = URL.createObjectURL(blob);
+      // Llama a la función para descargar el archivo con nombre productos.csv
+      triggerDownload(url, "productos.csv");
+    }
+  };
+  
+  const triggerDownload = (url, filename) => {
+    // crear el hipervinculo
+    const link = document.createElement("a");
+    // setear el href
+    link.href = url;
+    // al mismo enlace descargar el archivo
+    link.download = filename;
+    // agregar anchor tad en el DOM
+    document.body.appendChild(link);
+    // simular el clic en el elemento
+    link.click();
+    //eliminar el elemento anchor
+    document.body.removeChild(link);
+
   };
 
   return (
@@ -243,10 +302,25 @@ function App() {
         ordenAscendente={ordenAscendente}
         setOrdenAscendente={setOrdenAscendente}
       />
-          
-      {/* Productos */}
+
+      {/*  Exportar productos */}
+      <ExportarProductos
+        format={format}
+        setFormat={setFormat}
+        manejarExportacion={manejarExportacion}
+      />
+
+      {/* Paginacion */}
+        <Paginacion
+          page={page}
+          setPage={setPage}
+          total={productosFiltrados.length}
+          limite={limite}
+        />
+
+      {/* Productos Filtrados*/}
       <div>
-        {productosFiltrados.map((p)=>(
+        {productosPaginados.map((p)=>(
           <ProductList 
           titulo= {p.title} 
           precio = {p.price} 

@@ -11,7 +11,7 @@ function EstadisticasPorCategoria(props) {
         {Object.entries(props.estadisticasPorCategoria).map(([categoria, estadisticas]) => (
           <div
             key={categoria}
-            className="border-2 border-gray-800 px-4 py-6 rounded-lg items-center bg-white shadow flex flex-col"
+            className="border-2 border-gray-800 px-4 py-6 rounded-lg items-center  shadow flex flex-col"
           >
             <h3 className="text-lg font-semibold mb-2 text-blue-700">{categoria}</h3>
             <ul className="text-base text-gray-700">
